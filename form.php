@@ -1,62 +1,34 @@
-<?php session_start();
-if ($_SERVER["REQUEST_METHOD"] == "POST") 
-	 {if (empty($_POST['password'])||empty($_POST['reg'])) 
-		{
-                header("Location:oops_log_in_1.html");
-		exit; 	
-		}
+<?php session_start(); 
+if ($_SERVER["REQUEST_METHOD"] == "POST"){
 
-	else {
-		
+	if(empty($_POST['reg']) || empty($_POST['password']))
+	{	
+       header("Location: oops_log_in_1.html" );
+	}
 
-		$servername = "localhost";
-		$username = "root";
-		$password = "";
+	else
+	{	$reg=$_POST['reg'];
+		$pass=$_POST['password'];
 
-		try
-			{
-			
-			
-			$mail_id= test_input($_POST['mail_id']);
-			
-			if(!filter_var($mail_id, FILTER_VALIDATE_EMAIL))
-				{
-				header("Location:oops_log_in_1.html");
-				exit;
-				}
+		$servername='localhost';
+		$username='root';
+		$password='';
 
-			else
-				{
-				 $_SESSION['mail_id']=$mail_id;
-				}
-	
-  			$conn = new PDO("mysql:host=$servername;dbname = dba",$username,$password);
-  			$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); 
-
-   			if ($_SERVER["REQUEST_METHOD"] == "POST") {
-     			$stmt = $conn->prepare("INSERT INTO dba.customer (username,mail_id,password) VALUES (:username,:mail_id,:password)");
-     			$stmt->bindParam(':username',$username);
-    		 	$stmt->bindParam(':mail_id',$mail_id);
-     			$stmt->bindParam(':password',$password);
-     			$username = $_SESSION['name'];
-     			$password = test_input($_POST['password']);
-     			$_SESSION['cust_id']=$mail_id =$_SESSION['mail_id'];
-		        if(isset($_POST['mail_id'])) 
-     			{$mail_id = $_POST['mail_id']; }
-     			$stmt->execute();
-   			
-	
-
-
-
-
-
-
-
-$stmt=$conn->prepare("SELECT num FROM dba.customer WHERE mail_id='$mail_id' ");
+		try{
+			$conn = new PDO("mysql:host=$servername;dbname=dbas", $username, $password);
+			$conn->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+			$stmt=$conn->prepare("SELECT name,regno,gender,password FROM dbas.student WHERE regno='$reg' and password='$pass' ");
+			$stmt->setFetchMode(PDO::FETCH_ASSOC);
 			$stmt->execute();
 			$data=$stmt->fetch();
-			$_SESSION['num']=$data['num'];
+
+			if(($data['regno']==$reg) && ($data['password']==$pass)){
+
+
+
+$_SESSION['reg']=$reg;
+$_SESSION['gender']=$data['gender'];
+$_SESSION['name']=$data['name'];
 
 
 
@@ -66,44 +38,24 @@ $stmt=$conn->prepare("SELECT num FROM dba.customer WHERE mail_id='$mail_id' ");
 
 
 
+header("Location: home.html" );
+exit();
 
-
-
-
-
-
-
-
-
-
-
-
-                        header("Location:womed_1.html");
-			exit;}		
-			
-    		}
-
-
-		
-		catch(PDOException $e)
-    			{ header("Location:oops_log_in_1.html");
-		exit; 	
-  			 
+}
+			else{ 
+				header("Location: oops_log_in_1.html" );
+				exit();
     			}
+		}
 
-		$conn = null; 
-
+		catch(PDOException $e)
+			{ 
+			echo $e->getMessage();
+			}
+		$conn=null;
+	}
 }
-}
-
-function test_input($data){
-
-echo "hello";
-$data=trim($data);
-$data=stripslashes($data);
-$data=htmlspecialchars($data);
-return $data;
-}
-
-	
 ?>
+
+
+
